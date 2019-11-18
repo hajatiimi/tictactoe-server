@@ -1,33 +1,38 @@
 #!/usr/bin/python3
 
-import socketserver
-import threading
+import selectors
+import socket
 
-state = None
-state_lock = threading.Condition()
+sel = selectors.DefaultSelector()
 
-class TTTRequestHandler(socketserver.StreamRequestHandler):
-    
-    def handle(self):
-        global state
-        with state_lock:
-            print("New connection from {}:{} on thread {}".format(self.client_address[0], self.client_address[1], threading.current_thread().name))
-            print("State before: {}".format(state))
-            data = self.rfile.readline().strip()
-            state = data
-            self.wfile.write(data.upper())
-            print("State after: {}".format(state))
+def accept(sock, mask):
+    conn, addr = sock.accept()
+    print("New connection {} from {}".format(conn, addr))
+    conn.setblocking(False)
+    sel.register(conn, selectors.EVENT_READ, read)
 
-class TTTServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+def read(conn, mask):
+    data = conn.recv(1024)
+    if data:
+        print("Received data:", data)
+        conn.send(data)
+    else:
+        print("Closing connection")
+        sel.unregister(conn)
+        conn.close()
 
-    allow_reuse_address = True
-        
-if __name__ == "__main__":
+HOST = 'localhost'
+PORT = 8282
 
-    HOST = "localhost"
-    PORT = 8181
+sock = socket.socket()
+sock.bind(('localhost', 8181))
+sock.listen(100)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+sock.setblocking(False)
+sel.register(sock, selectors.EVENT_READ, accept)
 
-    with TTTServer((HOST, PORT), TTTRequestHandler) as server:
-        print("Ready to serve")
-        server.serve_forever()
-
+while True:
+    events = sel.select()
+    for key, mask in events:
+        callback = key.data
+        callback(key.fileobj, mask)
