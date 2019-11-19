@@ -34,8 +34,8 @@ def read(conn, mask):
 def handle_game_join(sock, *args):
     assert not args, "No arguments expected for GAME-JOIN"
     print("GAME-JOIN called:", args)
-    manager.add_new_player(sock)
-    sock.send(b'GAME-JOIN-ACK XYZ\n')
+    player_uuid = manager.add_new_player(sock)
+    sock.send(b'GAME-JOIN-ACK ' + bytes(player_uuid.encode('ascii')) + b'\n')
 
 HANDLERS[b'GAME-JOIN'] = handle_game_join
 
