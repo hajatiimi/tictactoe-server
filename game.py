@@ -1,3 +1,5 @@
+from player import Player
+
 class Game(object):
     """Class to manage a single TicTacToe game."""
 
@@ -11,7 +13,8 @@ class Game(object):
         assert player_two is not None
 
         print("New game started")
-        self.player_one_sock = player_one[0]
-        self.player_one_uuid = player_one[1]
-        self.player_two_sock = player_two[0]
-        self.player_two_uuid = player_two[1]
+        self.player_one = player_one
+        self.player_two = player_two
+
+        self.player_one.fsm.connect()
+        self.player_two.fsm.connect()

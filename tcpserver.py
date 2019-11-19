@@ -4,6 +4,7 @@ import selectors
 import socket
 
 from manager import Manager
+from player import Player
 
 sel = selectors.DefaultSelector()
 
@@ -34,10 +35,18 @@ def read(conn, mask):
 def handle_game_join(sock, *args):
     assert not args, "No arguments expected for GAME-JOIN"
     print("GAME-JOIN called:", args)
-    player_uuid = manager.add_new_player(sock)
-    sock.send(b'GAME-JOIN-ACK ' + bytes(player_uuid.encode('ascii')) + b'\n')
+    player = Player(sock)
+    sock.send(b'GAME-JOIN-ACK ' + bytes(player.uuid, 'ascii') + b'\n')
+    manager.add_new_player(player)
+
+def handle_game_ready_ack(sock, *args):
+    assert not args, "No arguments expected for GAME-READY-ACK"
+    print("GAME-READY-ACK called:", args)
+    # FIXME: We should have a state transition here!
+
 
 HANDLERS[b'GAME-JOIN'] = handle_game_join
+HANDLERS[b'GAME-READY-ACK'] = handle_game_ready_ack
 
 if __name__ == '__main__':
 
