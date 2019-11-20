@@ -2,9 +2,14 @@
 
 import selectors
 import socket
+import logging
 
 from manager import Manager
 from player import Player
+
+# Set up logging to stdout at DEBUG level
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 sel = selectors.DefaultSelector()
 
@@ -19,15 +24,14 @@ game = None
 
 def accept(sock, mask):
     conn, addr = sock.accept()
-    print("New client connection {} from {}".format(conn, addr))
+    logger.info("[Client {}] Connection from {}:{}".format(conn.fileno(), addr[0], addr[1]))
     conn.setblocking(False)
     sel.register(conn, selectors.EVENT_READ, read)
 
-    
+
 def read(sock, mask):
     data = sock.recv(1024).decode('ascii').strip()
-    print("data:", data)
-    print("length data:", len(data))
+    logger.info("[Client {}] Received data: {}".format(sock.fileno(), data))
     if data:
         cmd = data.split()
         if cmd[0] in HANDLERS:
@@ -35,34 +39,33 @@ def read(sock, mask):
         else:
             sock.send(b'ERROR\n')
     else:
-        print("Closing connection")
+        logger.info("[Client {}] Closing connection".format(sock.fileno()))
         sel.unregister(sock)
         sock.close()
 
-        
+
 def handle_game_join(sock, *args):
     global game  # FIXME: ugly!
     assert not args, "No arguments expected for GAME-JOIN"
-    print("GAME-JOIN called:", args)
+    logger.info("[Client {}] GAME-JOIN called: {}".format(sock.fileno(), args))
     player = Player(sock)
     sock.send(b'GAME-JOIN-ACK ' + bytes(player.uuid, 'ascii') + b'\n')
     game = manager.add_new_player(player)
-    print("game:", game)
-    
+
 
 def handle_game_ready_ack(sock, *args):
     assert not args, "No arguments expected for GAME-READY-ACK"
-    print("GAME-READY-ACK called:", args)
+    logger.info("[Client {}] GAME-READY-ACK called: {}".format(sock.fileno(), args))
     # FIXME: We should have a state transition here!
 
-    
+
 def handle_turn(sock, *args):
     global game  # FIXME: ugly!
     assert len(args) == 3, "Expected three arguments for TURN"
-    print("TURN called:", args)
+    logger.info("[Client {}] TURN called: {}".format(sock.fileno(), args))
     print("game in turn:", game)
     game.run_turn(sock, int(args[1]), int(args[2]))
-    
+
 HANDLERS['GAME-JOIN'] = handle_game_join
 HANDLERS['GAME-READY-ACK'] = handle_game_ready_ack
 HANDLERS['TURN'] = handle_turn
@@ -82,6 +85,8 @@ if __name__ == '__main__':
     sock.bind((host, port))
     sock.listen(100)
     sel.register(sock, selectors.EVENT_READ, accept)
+
+    logger.info("Server listening on {}:{}".format(host, port))
 
     while True:
         events = sel.select()

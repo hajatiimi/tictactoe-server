@@ -1,6 +1,8 @@
 import statemachine
 import uuid
+import logging
 
+logger = logging.getLogger(__name__)
 
 class PlayerState(statemachine.StateMachine):
     from statemachine import State
@@ -12,18 +14,20 @@ class PlayerState(statemachine.StateMachine):
 
     connect = unconnected.to(connected)
     win = connected.to(won)
-    lose = connected.to(lost)   
+    lose = connected.to(lost)
 
     def on_connect(self):
-        print('PlayerState:connect')
-        self.model.sock.send(b'GAME-READY\n')
+        logging.info("Player {}: PlayerState:connect".format(self.model.uuid))
+        # FIXME: Hardwired grid size used here!
+        # FIXME: Hardwired player 'UUID' used here!
+        self.model.sock.send("GAME-READY 3 3 XXX\n".encode())
 
     def on_win(self):
-        print('PlayerState:win')
+        logging.info("Player {}: PlayerState:win".format(self.model.uuid))
         self.model.sock.send(b'GAME-WON WON\n')
 
     def on_lose(self):
-        print('PlayerState:lose')
+        logging.info("Player {}: PlayerState:lose".format(self.model.uuid))
         self.model.sock.send(b'GAME-WON LOST\n')
         
 class Player(object):
