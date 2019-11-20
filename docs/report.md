@@ -69,7 +69,7 @@ games.
 
 ### Protocol
 
-The [protocol-example.txt](protocol) used between the server and
+The [protocol](protocol-example.txt) used between the server and
 clients is a simple protocol relying on an underlying streamed
 transport - in this case TCP. Framing of messages in the stream is
 done by a simple newline, '\n'. Character set used is vanilla ASCII.
