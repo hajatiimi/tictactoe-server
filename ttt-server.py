@@ -68,14 +68,18 @@ HANDLERS['GAME-READY-ACK'] = handle_game_ready_ack
 HANDLERS['TURN'] = handle_turn
 
 if __name__ == '__main__':
+    import sys
 
-    HOST = 'localhost'
-    PORT = 8282
+    if len(sys.argv) != 3:
+        print("Usage: {} <bind-to-host> <bind-to-port>".format(sys.argv[0]))
+        sys.exit(1)
+
+    host, port = sys.argv[1], int(sys.argv[2])
 
     sock = socket.socket()
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.setblocking(False)
-    sock.bind((HOST, PORT))
+    sock.bind((host, port))
     sock.listen(100)
     sel.register(sock, selectors.EVENT_READ, accept)
 
