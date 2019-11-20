@@ -11,42 +11,61 @@ sel = selectors.DefaultSelector()
 HANDLERS = {}
 manager = Manager()
 
+# FIXME: Framing is missing!
+# buffers = {}
+
+# FIXME: BUG! We can have only one game running!
+game = None
+
 def accept(sock, mask):
     conn, addr = sock.accept()
     print("New client connection {} from {}".format(conn, addr))
     conn.setblocking(False)
     sel.register(conn, selectors.EVENT_READ, read)
 
-def read(conn, mask):
-    data = conn.recv(1024)
-    print("data type:", type(data))
+    
+def read(sock, mask):
+    data = sock.recv(1024).decode('ascii').strip()
+    print("data:", data)
     print("length data:", len(data))
     if data:
         cmd = data.split()
         if cmd[0] in HANDLERS:
-            HANDLERS[cmd[0]](conn, *cmd[1:])
+            HANDLERS[cmd[0]](sock, *cmd[1:])
         else:
-            conn.send(b'ERROR\n')
+            sock.send(b'ERROR\n')
     else:
         print("Closing connection")
-        sel.unregister(conn)
-        conn.close()
+        sel.unregister(sock)
+        sock.close()
 
+        
 def handle_game_join(sock, *args):
+    global game  # FIXME: ugly!
     assert not args, "No arguments expected for GAME-JOIN"
     print("GAME-JOIN called:", args)
     player = Player(sock)
     sock.send(b'GAME-JOIN-ACK ' + bytes(player.uuid, 'ascii') + b'\n')
-    manager.add_new_player(player)
+    game = manager.add_new_player(player)
+    print("game:", game)
+    
 
 def handle_game_ready_ack(sock, *args):
     assert not args, "No arguments expected for GAME-READY-ACK"
     print("GAME-READY-ACK called:", args)
     # FIXME: We should have a state transition here!
 
-
-HANDLERS[b'GAME-JOIN'] = handle_game_join
-HANDLERS[b'GAME-READY-ACK'] = handle_game_ready_ack
+    
+def handle_turn(sock, *args):
+    global game  # FIXME: ugly!
+    assert len(args) == 3, "Expected three arguments for TURN"
+    print("TURN called:", args)
+    print("game in turn:", game)
+    game.run_turn(sock, int(args[1]), int(args[2]))
+    
+HANDLERS['GAME-JOIN'] = handle_game_join
+HANDLERS['GAME-READY-ACK'] = handle_game_ready_ack
+HANDLERS['TURN'] = handle_turn
 
 if __name__ == '__main__':
 

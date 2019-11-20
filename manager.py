@@ -25,6 +25,7 @@ class Manager(object):
             # No other player waiting.
             assert self.player_waiting is None
             self.player_waiting = player
+            return None
         else:
             # Another player is already waiting, start a game.
             assert self.player_waiting is not None
@@ -33,3 +34,4 @@ class Manager(object):
                 player_two=player,
             )
             self.player_waiting = None
+            return game

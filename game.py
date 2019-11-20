@@ -3,6 +3,10 @@ from player import Player
 class Game(object):
     """Class to manage a single TicTacToe game."""
 
+    # FIXME: Supports now only 3x3 grid.
+    ROWS = 3
+    COLUMNS = 3
+    
     def __init__(self, player_one=None, player_two=None):
         """
         Takes two tuples, one for each player. Both tuples should
@@ -16,5 +20,88 @@ class Game(object):
         self.player_one = player_one
         self.player_two = player_two
 
+        self.turn = 'one'  # READY PLAYER ONE!
+        self.grid = []
+        for r in range(self.ROWS):
+            self.grid.append([])
+            for c in range(self.COLUMNS):
+                self.grid[r].append(None)
+                
         self.player_one.fsm.connect()
         self.player_two.fsm.connect()
+
+    def get_player_by_sock(self, sock):
+        player = None
+        
+        if self.player_one.sock == sock:
+            player = self.player_one
+        if self.player_two.sock == sock:
+            player = self.player_two
+            
+        assert player is not None, "No player found for the sock"
+        
+        return player
+
+    def do_we_have_a_winner(self):
+        """Do what it says on the tin."""
+        WINNERS = (
+            ((0,0),(0,1),(0,2)),
+            ((1,0),(1,1),(1,2)),
+            ((2,0),(2,1),(2,2)),
+            ((0,0),(1,0),(2,0)),
+            ((0,1),(1,1),(2,1)),
+            ((0,2),(1,2),(2,2)),
+            ((0,0),(1,1),(2,2)),
+            ((0,2),(1,1),(2,0)),            
+        )
+
+        for x, y, z in WINNERS:
+            if self.grid[x[0]][x[1]] == self.grid[y[0]][y[1]] == self.grid[z[0]][z[1]] == '1':
+                return 'one'
+
+        for x, y, z in WINNERS:
+            if self.grid[x[0]][x[1]] == self.grid[y[0]][y[1]] == self.grid[z[0]][z[1]] == '2':
+                return 'two'
+
+        return None
+            
+    def run_turn(self, sock, row=None, column=None):
+        assert row is not None
+        assert column is not None
+        assert row >= 1 and row <= self.ROWS
+        assert column >= 1 and column <= self.COLUMNS
+
+        player = self.get_player_by_sock(sock)
+        print("turn at start:", self.turn)
+        print("got player:", player)
+        print("is player one:", player == self.player_one)
+        print("is player two:", player == self.player_two)
+
+        if self.turn == 'one':
+            assert player == self.player_one
+            self.grid[row-1][column-1] = '1'
+        if self.turn == 'two':
+            assert player == self.player_two
+            self.grid[row-1][column-1] = '2'
+            
+        print(self.grid)
+
+        winner = self.do_we_have_a_winner()
+        if winner is not None:
+            if winner == 'one':
+                self.player_one.fsm.win()
+                self.player_two.fsm.lose()
+            if winner == 'two':
+                self.player_two.fsm.won()
+                self.player_one.fsm.lose()
+                
+        if self.turn == 'one':
+            print("set turn to two")
+            self.turn = 'two'
+        elif self.turn == 'two':
+            print("set turn to one")
+            self.turn = 'one'
+        else:
+            assert False, "out of turn!"
+
+        print("turn at end:", self.turn)

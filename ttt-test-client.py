@@ -5,6 +5,7 @@
 # interactive testing of the server code.
 
 import socket
+import time
 
 
 HOST = "localhost"
@@ -12,7 +13,9 @@ PORT = 8282
 
 def send(sock, data):
     print("SEND:", data)
-    sock.sendall(bytes(data, "ascii") + b'\n')
+    sock.send(bytes(data, "ascii") + b'\n', 1024)
+    # FIXME: Super ugly hack to get TCP to flush the buffers (maybe).
+    time.sleep(1)
 
 def recv(sock):
     data = str(sock.recv(1024), "ascii").strip()
@@ -30,3 +33,4 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     data = recv(sock)
     send(sock, "GAME-READY-ACK")
 
+    send(sock, "TURN 001 1 1")
