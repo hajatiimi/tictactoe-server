@@ -1,5 +1,11 @@
 # REPORT FOR DISTRIBUTED SYSTEMS TASK 1
 
+Project team
+
+* Jani Takkinen
+* Aleksi Toivanen
+* Tuomas Toivonen
+
 
 ## Introduction
 
