@@ -126,6 +126,12 @@ per second with sustained throughput. Multiple servers could likely be
 run in parallel without adversely affecting the performance of each
 server.
 
+We did some packet capturing to measure the delay between TURN and TURN-ACK messages from one client. The average delays for one game were
+* Outgoing TURN to TURN ACK from server: 0.70 ms
+* Incoming TURN to TURN-ACK from client: 10.69 ms
+
+[Packet capture data](capture.csv)
+
 
 ## Missing features and improvement suggestions
 
