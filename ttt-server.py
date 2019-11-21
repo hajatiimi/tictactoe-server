@@ -29,10 +29,15 @@ manager = Manager()
 game = None
 
 def accept(sock, mask):
+    """
+    Accept the socket connection from new client.
+    Register the socket for read events on select() for async I/O.
+    """
     conn, addr = sock.accept()
     logger.info("[Client {}] Connection from {}:{}".format(conn.fileno(), addr[0], addr[1]))
     conn.setblocking(False)
     sel.register(conn, selectors.EVENT_READ, read)
+
 
 def write(sock, data):
     """
@@ -44,13 +49,21 @@ def write(sock, data):
     data = data + "\n"
     sock.send(data.encode())
 
+
 def read(sock, mask):
     """
     Read data from the socket, tokenise, and invoke the correct handler
     method. read() is called by Python selectors when a socket becomes
     ready for reading.
     """
-    data = sock.recv(1024).decode().strip()
+    try:
+        data = sock.recv(1024).decode().strip()
+    except ConnectionResetError:
+        logger.info("[Client {}] Client closed connection".format(sock.fileno()))
+        sel.unregister(sock)
+        sock.close()
+        return
+
     logger.info("[Client {}] Received data: {}".format(sock.fileno(), data))
     if data:
         cmd = data.split()
