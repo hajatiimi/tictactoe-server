@@ -13,7 +13,7 @@ virtualenv is your friend here.
 
 ```
 (cd tictactoe-server; python3 ttt-server.py localhost 8282)
-(cd tictactoe-client-1; python3 client.py localhost 8282)
+(cd tictactoe-client-2; python3 client.py localhost 8282)
 (cd tictactoe-client-2; python3 client.py localhost 8282)
 ```
 
