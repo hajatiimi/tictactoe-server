@@ -10,7 +10,7 @@ class PlayerState(statemachine.StateMachine):
     unconnected = State('Unconnected', initial=True)
     connected = State('Connected')
     won = State('Won')
-    lost = State('Lost')    
+    lost = State('Lost')
 
     connect = unconnected.to(connected)
     win = connected.to(won)
@@ -28,12 +28,12 @@ class PlayerState(statemachine.StateMachine):
 
     def on_win(self):
         logging.info("Player {}: PlayerState:win".format(self.model.uuid))
-        self.model.sock.send(b'GAME-WON WON\n')
+        self.model.write("GAME-WON {}".format(self.model.uuid))
 
     def on_lose(self):
         logging.info("Player {}: PlayerState:lose".format(self.model.uuid))
-        self.model.sock.send(b'GAME-WON LOST\n')
-        
+        self.model.write("GAME-WON {}".format("FIXME-THE-OTHER-PLAYER-WON"))
+
 class Player(object):
     """
     Represents a single connected client, that is, "The Player
@@ -43,7 +43,7 @@ class Player(object):
 
     def __init__(self, player_sock):
         self.state = 'unconnected'
-        
+
         self.sock = player_sock
         self.uuid = str(uuid.uuid4())
 
@@ -52,3 +52,14 @@ class Player(object):
 
     def make_starting_player(self):
         self.is_starting_player = True
+
+    def write(self, data):
+        """
+        Send the given data to the given socket. The data can be a 'str'
+        and will be encoded to a 'bytes' for sending on the wire. A '\n'
+        is automatically added.
+        """
+        # FIXME: Duplicated code from ttt-server.py
+        logger.info("[Client {}] Sending data: {}".format(self.sock.fileno(), data))
+        data = data + "\n"
+        self.sock.send(data.encode())
