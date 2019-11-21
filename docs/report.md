@@ -117,10 +117,17 @@ partially in the server to handle the protocol processing and game
 player state. Using FSMs throughout and having documented FSM for
 joining a game and playing a game would be important improvements.
 
+Performance - We tested the server (through the client applications)
+for performance in running a 3x3 grid game on a vanilla Lenovo
+ThinkPad T480s laptop running Linux. Sampled times (n=5) were {427,
+369, 349, 453, 373} with mean=393 and median=373. Using the mean value
+as an indicator we calculate that the test setup could run ~2.4 games
+per second with sustained throughput. Multiple servers could likely be
+run in parallel without adversely affecting the performance of each
+server.
+
 
 ## Missing features and improvement suggestions
-
-
 
 * We have not implemented a formal specification for the
   protocol. Nevertheless, even with the informal protocol example
