@@ -29,15 +29,30 @@ def accept(sock, mask):
     sel.register(conn, selectors.EVENT_READ, read)
 
 
+def write(sock, data):
+    """
+    Send the given data to the given socket. The data can be a 'str'
+    and will be encoded to a 'bytes' for sending on the wire. A '\n'
+    is automatically added.
+    """
+    logger.info("[Client {}] Sending data: {}".format(sock.fileno(), data))
+    data = data + "\n"
+    sock.send(data.encode())
+
 def read(sock, mask):
-    data = sock.recv(1024).decode('ascii').strip()
+    """
+    Read data from the socket, tokenise, and invoke the correct handler
+    method. read() is called by Python selectors when a socket becomes
+    ready for reading.
+    """
+    data = sock.recv(1024).decode().strip()
     logger.info("[Client {}] Received data: {}".format(sock.fileno(), data))
     if data:
         cmd = data.split()
         if cmd[0] in HANDLERS:
             HANDLERS[cmd[0]](sock, *cmd[1:])
         else:
-            sock.send(b'ERROR\n')
+            write(sock, "ERROR")
     else:
         logger.info("[Client {}] Closing connection".format(sock.fileno()))
         sel.unregister(sock)
@@ -49,7 +64,7 @@ def handle_game_join(sock, *args):
     assert not args, "No arguments expected for GAME-JOIN"
     logger.info("[Client {}] GAME-JOIN called: {}".format(sock.fileno(), args))
     player = Player(sock)
-    sock.send(b'GAME-JOIN-ACK ' + bytes(player.uuid, 'ascii') + b'\n')
+    write(sock, "GAME-JOIN-ACK {}".format(player.uuid))
     game = manager.add_new_player(player)
 
 
@@ -63,7 +78,6 @@ def handle_turn(sock, *args):
     global game  # FIXME: ugly!
     assert len(args) == 3, "Expected three arguments for TURN"
     logger.info("[Client {}] TURN called: {}".format(sock.fileno(), args))
-    print("game in turn:", game)
     game.run_turn(sock, int(args[1]), int(args[2]))
 
 HANDLERS['GAME-JOIN'] = handle_game_join

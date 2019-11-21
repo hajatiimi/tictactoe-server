@@ -66,6 +66,15 @@ challenges are present as we only have one process (or thread)
 accessing or modifying the variables that hold the states of the
 games.
 
+We also considered, but rejected, a client-server model where the
+clients would continuously poll the server. For example, if it is
+player one's turn, player two's client would in this model keep
+polling the server for an update on whether player one's client has
+sent the turn in. Instead, the protocol described below allows for
+request-response dynamics where the request can be initiated by either
+the client or the server. The implementation thus shares aspects from
+peer-to-peer patterns in addition to client-server.
+
 
 ### Protocol
 
@@ -89,7 +98,24 @@ response can contain zero or more parameters, delimited also by a
 space.
 
 
+## Software engineering considerations
+
+Python - Everything implemented in Python 3. Python was a natural
+selection due to the reasonable Python familiarity of every team
+member.
+
+Logging - Python logging is used so the level of debug message output
+is easy to control.
+
+Testing - There is no automated unit testing or other testing
+implemented. In a production quality implementation this would
+naturally be needed. For this exercise we considered this to be out of
+scope.
+
+
 ## Missing features and improvement suggestions
+
+
 
 * We have not implemented a formal specification for the
   protocol. Nevertheless, even with the informal protocol example
