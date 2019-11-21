@@ -26,9 +26,13 @@ class Game(object):
         assert player_one is not None
         assert player_two is not None
 
-        print("New game started")
         self.player_one = player_one
         self.player_two = player_two
+
+        logger.info("New game started: {}={} {}={}".format(
+            player_one.sock, player_one.uuid,
+            player_two.sock, player_two.uuid,
+        ))
 
         self.turn = 'one'  # READY PLAYER ONE!
         self.turn_seq = None
@@ -107,10 +111,9 @@ class Game(object):
         player = self.get_current_player_by_sock(sock)
         other_player = self.get_other_player_by_sock(sock)
 
-        print("turn at start:", self.turn)
-        print("got player:", player)
-        print("is player one:", player == self.player_one)
-        print("is player two:", player == self.player_two)
+        logger.info("[Client {}] Running turn {} for {}".format(sock.fileno(), self.turn_seq, self.turn))
+        logger.info("[Client {}] Client is player one: {}".format(sock.fileno(), player == self.player_one))
+        logger.info("[Client {}] Client is player two: {}".format(sock.fileno(), player == self.player_two))
 
         if self.turn == 'one':
             assert player == self.player_one
@@ -119,7 +122,7 @@ class Game(object):
             assert player == self.player_two
             self.grid[row-1][column-1] = '2'
 
-        print(self.grid)
+        logger.info("[Client {}] Grid after turn: {}".format(sock.fileno(), self.grid))
 
         winner = self.do_we_have_a_winner()
         if winner is not None:
@@ -131,15 +134,13 @@ class Game(object):
                 self.player_one.fsm.lose()
 
         if self.turn == 'one':
-            print("set turn to two")
             self.turn = 'two'
         elif self.turn == 'two':
-            print("set turn to one")
             self.turn = 'one'
         else:
             assert False, "out of turn!"
 
-        print("turn at end:", self.turn)
+        logger.info("[Client {}] Set next player to {}".format(sock.fileno(), self.turn))
 
         # Send TURN-ACK to the current player.
         self.write(sock, "TURN-ACK {}".format(self.turn_seq))
