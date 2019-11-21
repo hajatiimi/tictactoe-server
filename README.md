@@ -16,3 +16,7 @@ virtualenv is your friend here.
 (cd tictactoe-client-1; python3 client.py localhost 8282)
 (cd tictactoe-client-2; python3 client.py localhost 8282)
 ```
+
+## "THE ONLY WINNING MOVE IS NOT TO PLAY"
+
+[![WARGAMES 1982](http://img.youtube.com/vi/NHWjlCaIrQo/0.jpg)](http://www.youtube.com/watch?v=NHWjlCaIrQo "WARGAMES 1982")
