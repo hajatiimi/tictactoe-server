@@ -112,6 +112,11 @@ implemented. In a production quality implementation this would
 naturally be needed. For this exercise we considered this to be out of
 scope.
 
+State machines - A Python finite state machines library is used
+partially in the server to handle the protocol processing and game
+player state. Using FSMs throughout and having documented FSM for
+joining a game and playing a game would be important improvements.
+
 
 ## Missing features and improvement suggestions
 
