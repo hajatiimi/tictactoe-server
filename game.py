@@ -30,8 +30,8 @@ class Game(object):
         self.player_two = player_two
 
         logger.info("New game started: {}={} {}={}".format(
-            player_one.sock, player_one.uuid,
-            player_two.sock, player_two.uuid,
+            player_one.sock.fileno(), player_one.uuid,
+            player_two.sock.fileno(), player_two.uuid,
         ))
 
         self.turn = 'one'  # READY PLAYER ONE!
