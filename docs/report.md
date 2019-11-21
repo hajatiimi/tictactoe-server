@@ -142,3 +142,13 @@ server.
   running on a single host and communicating over TCP. Splitting the
   processes on three separate hosts would not (materially) change the
   logic of the implementation or add this exercise.
+
+
+## Example output from server and client interaction
+
+Example output captured from server and client logging is available
+with the links below:
+
+* [Server logs from one game session](server-run.txt)
+* [Client logs from one game session for Player One](client-run-one.txt)
+* [Client logs from one game session for Player Two](client-run-two.txt)
