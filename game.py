@@ -31,6 +31,7 @@ class Game(object):
         self.player_two = player_two
 
         self.turn = 'one'  # READY PLAYER ONE!
+        self.turn_seq = None
         self.grid = []
         for r in range(self.ROWS):
             self.grid.append([])
@@ -88,17 +89,20 @@ class Game(object):
 
         return None
 
-    def run_turn(self, sock, row=None, column=None):
+    def run_turn(self, sock, turn_seq=None, row=None, column=None):
         """
         Handle one turn with a player (client) submitting
         row and column where they want to play. Checks if
         the player won the game and then switches the turn
         to the other player.
         """
+        assert turn_seq is not None
         assert row is not None
         assert column is not None
         assert row >= 1 and row <= self.ROWS
         assert column >= 1 and column <= self.COLUMNS
+
+        self.turn_seq = turn_seq
 
         player = self.get_current_player_by_sock(sock)
         other_player = self.get_other_player_by_sock(sock)
@@ -138,11 +142,10 @@ class Game(object):
         print("turn at end:", self.turn)
 
         # Send TURN-ACK to the current player.
-        self.write(sock, "TURN-ACK XXX")  # FIXME: Turn number tracking missing!
+        self.write(sock, "TURN-ACK {}".format(self.turn_seq))
 
         # Send the TURN data to the other player.
-        self.write(other_player.sock, "TURN XXX {} {}".format(row, column))
-        # FIXME: Turn tracking number missing above, too.
+        self.write(other_player.sock, "TURN {} {} {}".format(self.turn_seq, row, column))
 
     def write(self, sock, data):
         """
