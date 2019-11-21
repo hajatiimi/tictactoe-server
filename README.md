@@ -21,4 +21,4 @@ virtualenv is your friend here.
 
 [![WARGAMES 1982](http://img.youtube.com/vi/NHWjlCaIrQo/0.jpg)](http://www.youtube.com/watch?v=NHWjlCaIrQo "WARGAMES 1982")
 
-WARGAMES (1982): http://img.youtube.com/vi/NHWjlCaIrQo/0.jpg
+WARGAMES (1982): http://www.youtube.com/watch?v=NHWjlCaIrQo
