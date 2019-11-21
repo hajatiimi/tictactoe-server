@@ -1,5 +1,11 @@
 #!/usr/bin/python3
 
+"""
+Main code for the TicTacToe server. Run from the command line with
+parameters for server-host and server-port (where the server will
+listen for connections).
+"""
+
 import selectors
 import socket
 import logging
@@ -27,7 +33,6 @@ def accept(sock, mask):
     logger.info("[Client {}] Connection from {}:{}".format(conn.fileno(), addr[0], addr[1]))
     conn.setblocking(False)
     sel.register(conn, selectors.EVENT_READ, read)
-
 
 def write(sock, data):
     """
@@ -80,9 +85,17 @@ def handle_turn(sock, *args):
     logger.info("[Client {}] TURN called: {}".format(sock.fileno(), args))
     game.run_turn(sock, int(args[1]), int(args[2]))
 
+
+def handle_turn_ack(sock, *args):
+    assert len(args) == 1, "Expected one argument for TURN-ACK"
+    logger.info("[Client {}] TURN-ACK called: {}".format(sock.fileno(), args))
+    # This is really a no-op. We could check the turn number for verification.
+
+
 HANDLERS['GAME-JOIN'] = handle_game_join
 HANDLERS['GAME-READY-ACK'] = handle_game_ready_ack
 HANDLERS['TURN'] = handle_turn
+HANDLERS['TURN-ACK'] = handle_turn_ack
 
 if __name__ == '__main__':
     import sys
