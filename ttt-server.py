@@ -83,7 +83,7 @@ def handle_turn(sock, *args):
     global game  # FIXME: ugly!
     assert len(args) == 3, "Expected three arguments for TURN"
     logger.info("[Client {}] TURN called: {}".format(sock.fileno(), args))
-    game.run_turn(sock, int(args[1]), int(args[2]))
+    game.run_turn(sock, args[0], int(args[1]), int(args[2]))
 
 
 def handle_turn_ack(sock, *args):
