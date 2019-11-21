@@ -20,7 +20,11 @@ class PlayerState(statemachine.StateMachine):
         logging.info("Player {}: PlayerState:connect".format(self.model.uuid))
         # FIXME: Hardwired grid size used here!
         # FIXME: Hardwired player 'UUID' used here!
-        self.model.sock.send("GAME-READY 3 3 XXX\n".encode())
+        if self.model.is_starting_player:
+            starting_player_id = self.model.uuid
+        else:
+            starting_player_id = "someone else"
+        self.model.sock.send("GAME-READY 3 3 {}\n".format(starting_player_id).encode())
 
     def on_win(self):
         logging.info("Player {}: PlayerState:win".format(self.model.uuid))
@@ -44,3 +48,7 @@ class Player(object):
         self.uuid = str(uuid.uuid4())
 
         self.fsm = PlayerState(self)
+        self.is_starting_player = False
+
+    def make_starting_player(self):
+        self.is_starting_player = True

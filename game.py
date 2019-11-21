@@ -27,6 +27,7 @@ class Game(object):
             for c in range(self.COLUMNS):
                 self.grid[r].append(None)
                 
+        self.player_one.make_starting_player()
         self.player_one.fsm.connect()
         self.player_two.fsm.connect()
 
